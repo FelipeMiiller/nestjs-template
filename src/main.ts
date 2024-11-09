@@ -4,7 +4,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './ioC/app.module';
 import { ConfigService } from '@nestjs/config';
 import { AllExceptionsFilter } from './common/middlewares/exception.filter';
-import { LoggerService } from './common/loggers/logger.service';
+import { LoggerService } from './common/loggers/domain/logger.service';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,7 +14,7 @@ async function bootstrap() {
   logger.contextName = bootstrap.name;
   app.enableCors({ origin: env.origin });
 
-  const configSwagger = new DocumentBuilder().setTitle('corelab-api-challenge').setVersion('1.0').build();
+  const configSwagger = new DocumentBuilder().setTitle('Template-Nest').setVersion('1.0').build();
   const document = SwaggerModule.createDocument(app, configSwagger);
   SwaggerModule.setup('api', app, document);
 

@@ -4,7 +4,7 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Queue } from 'bullmq';
 import { CreateUserDto, UserOutput } from '../http/dtos/create-users.dto';
 import { UsersModel } from './models/users.model';
-import { LoggerService } from 'src/common/loggers/logger.service';
+import { LoggerService } from 'src/common/loggers/domain/logger.service';
 import { UpdateUserDto } from '../http/dtos/update-users.dto';
 import { UserCreatedEvent } from 'src/common/events/user-created.event';
 import { USERS_REPOSITORY_TOKEN, UsersRepository } from './repositories/user.repository.interface';

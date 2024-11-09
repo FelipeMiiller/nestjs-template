@@ -1,16 +1,18 @@
 import { Repository } from 'typeorm';
-import { TaskModel } from '../models/logs.model';
+
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, Provider } from '@nestjs/common';
-import { TasksTypeOrmRepository } from './implementations/logs.repository';
-import { USERS_REPOSITORY_TOKEN } from './implementations/logs.repository.interface';
+import { LOGGERS_REPOSITORY_TOKEN } from './logger.repository.interface';
+import { LoggersTypeOrmRepository } from './logger.repository';
+import { LoggersModel } from '../models/logs.model';
+
 
 export function provideTasksRepository(): Provider[] {
   return [
     {
-      provide: USERS_REPOSITORY_TOKEN,
+      provide: LOGGERS_REPOSITORY_TOKEN,
       useFactory: async (dependenciesProvider: TasksRepoDependenciesProvider) =>
-        new TasksTypeOrmRepository(dependenciesProvider.typeOrmRepository),
+        new LoggersTypeOrmRepository(dependenciesProvider.typeOrmRepository),
       inject: [TasksRepoDependenciesProvider],
     },
     TasksRepoDependenciesProvider,
@@ -20,7 +22,7 @@ export function provideTasksRepository(): Provider[] {
 @Injectable()
 export class TasksRepoDependenciesProvider {
   constructor(
-    @InjectRepository(TaskModel)
-    public typeOrmRepository: Repository<TaskModel>,
+    @InjectRepository(LoggersModel)
+    public typeOrmRepository: Repository<LoggersModel>,
   ) {}
 }

@@ -3,7 +3,7 @@ import { S3 } from 'aws-sdk';
 import { ConfigType } from '@nestjs/config';
 import { S3Provider } from './s3-provider.constant';
 import s3Config from 'src/config/bucket.config';
-import { LoggerService } from '../loggers/logger.service';
+import { LoggerService } from '../loggers/domain/logger.service';
 
 export interface S3Result {
   readonly expires: number;

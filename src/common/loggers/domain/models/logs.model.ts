@@ -1,7 +1,7 @@
-import { Entity, Column, Index, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, Index} from 'typeorm';
 
 @Entity({ name: 'logs' })
-export class LogsModel {
+export class LoggersModel {
   @Column({ primary: true, generated: 'uuid', nullable: false })
   id: string;
 

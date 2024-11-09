@@ -1,8 +1,5 @@
 import { createLogger, format, Logger, transports } from 'winston';
 import { Injectable, Scope } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { LogsModel } from './models/logs.model';
-import { Repository } from 'typeorm';
 
 export enum LogLevel {
   INFO = 'info',
@@ -16,13 +13,7 @@ export class LoggerService {
   private _contextName = 'Default';
   private readonly logger: Logger = createLogger();
 
-  constructor(
-
-    @InjectRepository(LogsModel)
-    private readonly logRepository: Repository<LogsModel>,
-
-
-  ) {
+  constructor() {
     this.logger.configure({
       transports: [this.logTransportConsole()],
       exitOnError: false,
@@ -69,15 +60,6 @@ export class LoggerService {
       meta: { context: this.contextName, idempotency: this._idempotencyKey },
     });
   }
-
-
-
-
-
-
-
-
-
 
   private logTransportConsole() {
     return new transports.Console({
