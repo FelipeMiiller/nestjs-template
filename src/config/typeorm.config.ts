@@ -4,12 +4,11 @@ import { UsersModel } from 'src/modules/users/domain/models/users.model';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { config as dotenvConfig } from 'dotenv';
 import { pathEnv } from './app.config';
-import { mongo } from 'mongoose';
+
 dotenvConfig({ path: pathEnv });
 
 const ConnectionDatabaseType = {
   postgres: 'postgres',
- 
 };
 
 const config = {

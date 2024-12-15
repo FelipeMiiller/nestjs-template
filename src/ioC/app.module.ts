@@ -10,12 +10,30 @@ import { BullModule } from '@nestjs/bullmq';
 import redisConfig from 'src/config/redis.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
+import { PrismaModule } from 'src/common/prisma/prisma.module';
 
 @Module({
   imports: [
     UploadS3Module,
     UsersModule,
     EventEmitterModule.forRoot(),
+    PrismaModule.registerAsync({
+      imports: [ConfigModule],
+      isGlobal: true,
+      useFactory: async (configService: ConfigService) => {
+        return {
+          options: {
+            datasources: {
+              db: {
+                url: configService.get('prisma.url'),
+              },
+            },
+          },
+        };
+      },
+      inject: [ConfigService],
+    }),
+
     BullModule.forRootAsync({
       imports: [ConfigModule.forRoot({ load: [redisConfig] })],
       useFactory: (configDatabase: ConfigType<typeof redisConfig>) => ({

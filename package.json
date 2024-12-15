@@ -9,12 +9,17 @@
     "clean": "rm -rf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "credit:start:dev": "npx nodemon --exec 'ts-node src/credit-main.ts'",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+    "db:migrate-postgres": "dotenv -e .env${NODE_ENV:+.${NODE_ENV}} -- npx prisma db push --schema src/schemas/schema.postgres.prisma",
+    "db:format": "npx prisma format",
+    "db:generate": "dotenv -e .env${NODE_ENV:+.${NODE_ENV}} -- npx prisma generate",
+    "db:migrate": "dotenv -e .env${NODE_ENV:+.${NODE_ENV}} -- npx prisma migrate deploy",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "prestart:dev": " npm run lint && npm run format",
+    "prestart:dev": " yarn lint && yarn format",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -63,6 +68,7 @@
     "eslint": "8.57.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-prettier": "^5.2.1",
     "husky": "^9.1.4",
     "jest": "^29.5.0",
     "lint-staged": "^15.2.9",
@@ -92,5 +98,8 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "prisma": {
+    "schema": "src/schemas/schema.mongo.prisma"
   }
 }

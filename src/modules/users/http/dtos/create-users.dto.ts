@@ -24,7 +24,7 @@ export class UserOutput {
 
   @Field(() => Date)
   readonly createdAt: Date;
-  
+
   @Field(() => Date)
   readonly updatedAt: Date;
 }

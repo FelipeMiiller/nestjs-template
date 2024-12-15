@@ -34,7 +34,6 @@ export class CreateUsersTable1723809312769 implements MigrationInterface {
           {
             name: 'email',
             type: 'varchar',
-         
           },
           {
             name: 'createdAt',

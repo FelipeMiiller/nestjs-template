@@ -46,7 +46,9 @@ export class UploaderS3Service {
       };
 
       await this.s3Provider.putObject(data).promise();
-      this.loggerService.info(`Uploading file ${referenceKey}.${fileType} to bucket ${this.configService.bucket}`);
+      this.loggerService.info(
+        `Uploading file ${referenceKey}.${fileType} to bucket ${this.configService.bucket}`,
+      );
     } catch (error) {
       this.loggerService.error(
         `Error uploading file ${referenceKey}.${fileType} to bucket ${this.configService.bucket}`,
@@ -56,7 +58,11 @@ export class UploaderS3Service {
     }
   }
 
-  public async getUrl(referenceKey: string, fileType: string, expiresInSeconds: number): Promise<S3Result> {
+  public async getUrl(
+    referenceKey: string,
+    fileType: string,
+    expiresInSeconds: number,
+  ): Promise<S3Result> {
     try {
       if (!referenceKey) {
         throw new HttpException('referenceKey is null or undefined', HttpStatus.BAD_REQUEST);
@@ -111,7 +117,9 @@ export class UploaderS3Service {
       };
 
       await this.s3Provider.deleteObject(params).promise();
-      this.loggerService.info(`Deleting file ${referenceKey}.${fileType} from  bucket ${this.configService.bucket}`);
+      this.loggerService.info(
+        `Deleting file ${referenceKey}.${fileType} from  bucket ${this.configService.bucket}`,
+      );
     } catch (error) {
       this.loggerService.error(
         `Error deleting file ${referenceKey}.${fileType} from bucket ${this.configService.bucket}`,

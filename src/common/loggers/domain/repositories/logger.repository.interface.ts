@@ -1,13 +1,10 @@
-import { LoggerEntity } from '../entities/logger.entity';
-import { LoggersModel } from '../models/logs.model';
+import { CreateLoggerDto } from '../../dto/create-logger.dto';
 
-export interface LoggersRepository {
-  create(logger: LoggerEntity): Promise<LoggersModel>;
-  update(id: string, logger: Partial<LoggerEntity>): Promise<LoggersModel>;
-  delete(id: string): Promise<void>;
-  deleteAll(): Promise<void>;
-  findById(id: string): Promise<LoggersModel>;
-  findMany(pagination?: Partial<{ page: number; limit: number }>, title?: string): Promise<LoggersModel[]>;
+export interface ILoggersRepository {
+  create(createLoggerDto: CreateLoggerDto): Promise<void>;
+  findAll(): Promise<any[]>;
+  findAllByLevel(level: string): Promise<any[]>;
+  findAllByUserId(id: string): Promise<any[]>;
+  findAllByUserIdAndLevel(id: string, level: string): Promise<any[]>;
+  findOne(id: number): Promise<any>;
 }
-
-export const LOGGERS_REPOSITORY_TOKEN = 'loggers-repository-token';

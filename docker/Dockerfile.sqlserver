@@ -1,0 +1,21 @@
+FROM mcr.microsoft.com/mssql/server:2022-latest
+ENV TZ="America/Sao_Paulo"
+
+# Definir variáveis de ambiente
+ENV ACCEPT_EULA=Y
+# ENV MSSQL_SA_PASSWORD=yourStrong(!)PasswordDD  # Consider using Docker secrets instead
+
+# Criar diretório para scripts de inicialização (opcional)
+WORKDIR /usr/src/app
+
+# Copiar scripts SQL de inicialização (opcional)
+# COPY ./init.sql /usr/src/app/init.sql
+
+# Expor a porta padrão do SQL Server
+EXPOSE 1433
+
+# Definir o usuário root para permissões adequadas
+USER root
+
+# Comando para iniciar o SQL Server
+CMD ["/opt/mssql/bin/sqlservr"]

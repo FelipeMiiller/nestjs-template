@@ -1,5 +1,4 @@
-export class Logger {
-  Id: number;
+export class CreateLoggerDto {
   UserId?: string;
   level: string;
   message: string;

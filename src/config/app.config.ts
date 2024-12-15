@@ -5,4 +5,5 @@ export default registerAs('app', () => ({
   origin: process.env.ORIGIN || 'http://localhost:3000',
 }));
 
-export const pathEnv = process.env.NODE_ENV !== undefined ? `.env.${process.env.NODE_ENV.trim()}` : `.env`;
+export const pathEnv =
+  process.env.NODE_ENV !== undefined ? `.env.${process.env.NODE_ENV.trim()}` : `.env`;

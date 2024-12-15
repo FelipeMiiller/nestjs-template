@@ -2,12 +2,12 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Queue } from 'bullmq';
-import { CreateUserDto, UserOutput } from '../http/dtos/create-users.dto';
-import { UsersModel } from './models/users.model';
+import { CreateUserDto } from '../http/dtos/create-users.dto';
 import { LoggerService } from 'src/common/loggers/domain/logger.service';
 import { UpdateUserDto } from '../http/dtos/update-users.dto';
 import { UserCreatedEvent } from 'src/common/events/user-created.event';
 import { USERS_REPOSITORY_TOKEN, UsersRepository } from './repositories/user.repository.interface';
+import { User } from './entities/users.entity';
 
 @Injectable()
 export class UsersService {
@@ -21,7 +21,7 @@ export class UsersService {
     this.loggerService.contextName = UsersService.name;
   }
 
-  async create(userDto: CreateUserDto): Promise<UsersModel> {
+  async create(userDto: CreateUserDto): Promise<User> {
     try {
       const { email, name } = userDto;
       const user = await this.usersRepository.create(userDto);
@@ -30,7 +30,10 @@ export class UsersService {
       await this.usersQueue.add('user.email.send', new UserCreatedEvent(name, email));
       return user;
     } catch (error) {
-      this.loggerService.error(`Error creating user with name ${userDto.name} and email ${userDto.email}`, error);
+      this.loggerService.error(
+        `Error creating user with name ${userDto.name} and email ${userDto.email}`,
+        error,
+      );
       throw error;
     }
   }
@@ -42,7 +45,7 @@ export class UsersService {
     this.loggerService.info(`USER CREATED --> EVENT EMITTER ${event.email}`);
   }
 
-  async update(id: string, user: UpdateUserDto): Promise<UserOutput> {
+  async update(id: string, user: UpdateUserDto): Promise<User> {
     try {
       const taskUpdated = await this.usersRepository.update(id, user);
 
@@ -54,16 +57,19 @@ export class UsersService {
     }
   }
 
-  async findMany(pagination?: Partial<{ page: number; limit: number }>, title?: string): Promise<UserOutput[]> {
+  async findMany(
+    pagination?: Partial<{ page: number; limit: number }>,
+    name?: string,
+  ): Promise<User[]> {
     try {
-      return this.usersRepository.findMany(pagination, title);
+      return this.usersRepository.findMany(pagination, name);
     } catch (error) {
-      this.loggerService.error(`Error finding tasks ${title}`, error);
+      this.loggerService.error(`Error finding tasks ${name}`, error);
       throw error;
     }
   }
 
-  async findById(id: string): Promise<UserOutput> {
+  async findById(id: string): Promise<User> {
     try {
       return this.usersRepository.findById(id);
     } catch (error) {

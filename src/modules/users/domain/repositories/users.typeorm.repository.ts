@@ -1,7 +1,7 @@
 import { ILike, Repository } from 'typeorm';
 import { UsersModel } from '../models/users.model';
 import { USERS_REPOSITORY_TOKEN, UsersRepository } from './user.repository.interface';
-import { UserEntity } from '../entities/users.entity';
+import { User } from '../entities/users.entity';
 import { Inject } from '@nestjs/common';
 
 export class UsersTypeOrmRepository implements UsersRepository {
@@ -10,14 +10,14 @@ export class UsersTypeOrmRepository implements UsersRepository {
     private readonly usersRepository: Repository<UsersModel>,
   ) {}
 
-  async create(task: UserEntity): Promise<UsersModel> {
+  async create(task: User): Promise<UsersModel> {
     const tasksCreated = this.usersRepository.create(task);
 
     return this.usersRepository.save(tasksCreated);
   }
 
-  async update(id: string, task: Partial<UserEntity>): Promise<UsersModel> {
-    const filteredTask: Partial<UserEntity> = Object.keys(task).reduce((acc, key) => {
+  async update(id: string, task: Partial<User>): Promise<UsersModel> {
+    const filteredTask: Partial<User> = Object.keys(task).reduce((acc, key) => {
       if (Boolean(task[key])) {
         acc[key] = task[key];
       }
@@ -42,7 +42,10 @@ export class UsersTypeOrmRepository implements UsersRepository {
     });
   }
 
-  async findMany(pagination?: Partial<{ page: number; limit: number }>, name?: string): Promise<UsersModel[]> {
+  async findMany(
+    pagination?: Partial<{ page: number; limit: number }>,
+    name?: string,
+  ): Promise<UsersModel[]> {
     const { page = 1, limit = 10 } = pagination || {};
 
     const skip = (page - 1) * limit;

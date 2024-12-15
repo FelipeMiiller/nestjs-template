@@ -24,7 +24,6 @@ export class UsersManagementProcessor {
     switch (job.name) {
       case 'user.created': {
         await this.verify(job);
-        break;
       }
       case 'user.email.send': {
         await this.sendEmail(job);
@@ -33,13 +32,13 @@ export class UsersManagementProcessor {
     }
   }
 
- private async verify({ data }: Job<UserCreatedEvent>) {
+  private async verify({ data }: Job<UserCreatedEvent>) {
     this.loggerService.info(`Called method: ${this.verify.name}()`);
     const createdUser = await this.userModel.create(data);
     this.loggerService.info(`USER CREATED: ${JSON.stringify(createdUser)}`);
   }
 
- private async sendEmail({ data }: Job<UserCreatedEvent>) {
+  private async sendEmail({ data }: Job<UserCreatedEvent>) {
     this.loggerService.info(`Called method: ${this.sendEmail.name}()`);
     const createdUser = await this.userModel.create(data);
     this.loggerService.info(`USER SEND EMAIL: ${JSON.stringify(createdUser)}`);

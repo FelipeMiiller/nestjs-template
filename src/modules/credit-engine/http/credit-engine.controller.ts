@@ -1,7 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { CreditService } from '../domain/credit-engine.service';
 
-
 @Controller('credit')
 export class CreditController {
   constructor(private readonly creditService: CreditService) {}

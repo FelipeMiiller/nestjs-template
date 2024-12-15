@@ -8,10 +8,10 @@ import { ConfigService } from '@nestjs/config';
 @Module({
   imports: [
     LoggerModule,
-        MongooseModule.forRootAsync({
-            inject: [ConfigService], useFactory: async (configService: ConfigService) => configService.get('prisma'),
-        
-     }),
+    MongooseModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => configService.get('prisma'),
+    }),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
   providers: [UsersManagementProcessor],
