@@ -1,14 +1,15 @@
 import { Inject, Injectable, OnModuleInit, Optional } from '@nestjs/common';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { softDeleteMiddleware } from './softDeleteMiddleware';
 import { MODULE_OPTIONS_TOKEN } from './prisma.module-definition';
+import { PrismaClientOptions } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
   constructor(
     @Optional()
     @Inject(MODULE_OPTIONS_TOKEN)
-    private options?: Prisma.PrismaClientOptions,
+    private options?: PrismaClientOptions,
   ) {
     super(options);
   }

@@ -1,8 +1,8 @@
+import { PrismaClientOptions } from '@prisma/client/runtime/library';
 import { ConfigurableModuleBuilder } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 
 export interface ConfigModuleOptions {
-  options?: Prisma.PrismaClientOptions;
+  options?: PrismaClientOptions;
 }
 
 export const { ConfigurableModuleClass, MODULE_OPTIONS_TOKEN } =

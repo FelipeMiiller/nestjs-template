@@ -17,20 +17,16 @@ import { PrismaModule } from 'src/common/prisma/prisma.module';
     UploadS3Module,
     UsersModule,
     EventEmitterModule.forRoot(),
-    PrismaModule.registerAsync({
+    PrismaModule.forRootAsync({
       imports: [ConfigModule],
       isGlobal: true,
-      useFactory: async (configService: ConfigService) => {
-        return {
-          options: {
-            datasources: {
-              db: {
-                url: configService.get('prisma.url'),
-              },
-            },
+      useFactory: async (configService: ConfigService) => ({
+        datasources: {
+          db: {
+            url: configService.get('prisma.url'),
           },
-        };
-      },
+        },
+      }),
       inject: [ConfigService],
     }),
 

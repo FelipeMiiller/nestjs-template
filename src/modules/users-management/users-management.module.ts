@@ -10,7 +10,9 @@ import { ConfigService } from '@nestjs/config';
     LoggerModule,
     MongooseModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => configService.get('prisma'),
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('mongoUri'), // Use correct config key for MongoDB URI
+      }),
     }),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
