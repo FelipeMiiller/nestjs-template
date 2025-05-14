@@ -1,32 +1,31 @@
 import { ILike, Repository } from 'typeorm';
-import { UsersModel } from '../models/users.model';
-import { USERS_REPOSITORY_TOKEN, UsersRepository } from './user.repository.interface';
-import { User } from '../entities/users.entity';
-import { Inject } from '@nestjs/common';
+
+import { InjectRepository } from '@nestjs/typeorm';
+
+import { UsersRepository } from './user.repository.interface';
+import { User } from '../models/users.model';
 
 export class UsersTypeOrmRepository implements UsersRepository {
   constructor(
-    @Inject(USERS_REPOSITORY_TOKEN)
-    private readonly usersRepository: Repository<UsersModel>,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
   ) {}
 
-  async create(task: User): Promise<UsersModel> {
-    const tasksCreated = this.usersRepository.create(task);
+  async create(task: User) {
+    const tasksCreated = await this.usersRepository.insert(task);
 
-    return this.usersRepository.save(tasksCreated);
+    return {
+      ...task,
+      id: tasksCreated.identifiers[0].id,
+      createdAt: tasksCreated.identifiers[0].createdAt,
+      updatedAt: tasksCreated.identifiers[0].updatedAt,
+    };
   }
 
-  async update(id: string, task: Partial<User>): Promise<UsersModel> {
-    const filteredTask: Partial<User> = Object.keys(task).reduce((acc, key) => {
-      if (Boolean(task[key])) {
-        acc[key] = task[key];
-      }
-      return acc;
-    }, {});
-
+  async update(id: string, task: Partial<User>) {
     const updateTask = await this.usersRepository.preload({
       id,
-      ...filteredTask,
+      ...task,
     });
 
     if (!updateTask) {
@@ -36,7 +35,7 @@ export class UsersTypeOrmRepository implements UsersRepository {
     return await this.usersRepository.save(updateTask);
   }
 
-  async findById(id: string): Promise<UsersModel> {
+  async findById(id: string) {
     return this.usersRepository.findOne({
       where: { id: id },
     });
@@ -45,7 +44,7 @@ export class UsersTypeOrmRepository implements UsersRepository {
   async findMany(
     pagination?: Partial<{ page: number; limit: number }>,
     name?: string,
-  ): Promise<UsersModel[]> {
+  ): Promise<User[]> {
     const { page = 1, limit = 10 } = pagination || {};
 
     const skip = (page - 1) * limit;
@@ -62,11 +61,11 @@ export class UsersTypeOrmRepository implements UsersRepository {
     });
   }
 
-  async delete(id: string): Promise<void> {
-    await this.usersRepository.delete({ id });
+  async delete(id: string) {
+    await this.usersRepository.delete(id);
   }
 
-  async deleteAll(): Promise<void> {
+  async deleteAll() {
     await this.usersRepository.delete({});
   }
 }

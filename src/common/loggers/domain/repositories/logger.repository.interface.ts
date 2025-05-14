@@ -6,5 +6,5 @@ export interface ILoggersRepository {
   findAllByLevel(level: string): Promise<any[]>;
   findAllByUserId(id: string): Promise<any[]>;
   findAllByUserIdAndLevel(id: string, level: string): Promise<any[]>;
-  findOne(id: number): Promise<any>;
+  findOne(id: string): Promise<any>;
 }

@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, Entity, Index, UpdateDateColumn } from 'typeorm';
 
 @Entity({ name: 'users' })
-export class UsersModel {
+export class User {
   @Column({ primary: true, generated: 'uuid', nullable: false })
   public id: string;
 

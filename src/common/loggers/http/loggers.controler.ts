@@ -17,6 +17,6 @@ export class LoggersController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.loggersRepository.findOne(+id);
+    return this.loggersRepository.findOne(id);
   }
 }

@@ -1,6 +1,7 @@
 version: '3'
 
 services:
+
   sqlserver:
     container_name: sqlserver-db
     hostname: mssql-db
@@ -15,73 +16,101 @@ services:
       - "1433:1433"
     volumes:
       - sqlserver:/var/opt/mssql
-      
+    networks:
+      - app-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
   postgres:
-    container_name: qso
-    image: 17.0-alpine
+    container_name: postgres
+    image: postgres:17.0-alpine
     environment:
-      POSTGRES_DB: 'qso_example'
-      POSTGRES_USER: 'qso_user'
-      POSTGRES_PASSWORD: 'qso_password'
+      POSTGRES_DB: ${POSTGRES_DB:-core}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
     ports:
       - '5432:5432'
     expose:
       - '5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
-    external_links:
-      - app-network
-    volumes:
-      - ./.docker-volumes/pgdata2:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  mongodb_container:
+  mongodb:
     image: mongo:8.0.0
     ports:
       - 27017:27017
     volumes:
       - mongodb_data_container:/data/db
-
-  redis:
-    container_name: qso_redis
-    image: redis:alpine
-    ports:
-      - 6379:6379
-    volumes:
-      - .:/usr/app
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-password}
     networks:
       - app-network
-  # app:
-  #   build:
-  #     context: .
-  #   container_name: app-all-module
-  #   command: yarn start:dev
-  #   ports:
-  #     - '3002:3002'
-  #   volumes:
-  #     - .:/usr/app
-  #   networks:
-  #     - app-network
-  #   depends_on:
-  #     - postgres
-  #     - mongodb_container
-  #     - redis
-  #   volumes:
-  #    - .:/app
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # app-credit:
-  #   build:
-  #     context: .
-  #   container_name: app-credit
-  #   command: yarn credit:start:dev
-  #   ports:
-  #     - '3003:3003'
-  #   volumes:
-  #     - .:/usr/app
-  #   networks:
-  #     - app-network
+
+
+
+  redis:
+    container_name: redis
+    image: redis:7.4.1-alpine3.20
+    ports:
+      - '6379'
+    networks:
+      - app-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.core
+    container_name: app
+    ports:
+      - '3001:3001'
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+    networks:
+      - app-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3001/health']
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
 networks:
   app-network:
+    driver: bridge
 
 volumes:
+  sqlserver:
+    driver: local
+  postgres_data:
+    driver: local
+  postgres_backup:
+    driver: local
   mongodb_data_container:
+    driver: local

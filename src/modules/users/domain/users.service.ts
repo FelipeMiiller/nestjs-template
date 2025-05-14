@@ -21,17 +21,20 @@ export class UsersService {
     this.loggerService.contextName = UsersService.name;
   }
 
-  async create(userDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto) {
     try {
-      const { email, name } = userDto;
-      const user = await this.usersRepository.create(userDto);
+      const { email, name } = createUserDto;
+      const user = await this.usersRepository.create({
+        email,
+        name,
+      });
       this.eventEmitter.emit('user.created', new UserCreatedEvent(name, email));
       await this.usersQueue.add('user.created', new UserCreatedEvent(name, email));
       await this.usersQueue.add('user.email.send', new UserCreatedEvent(name, email));
       return user;
     } catch (error) {
       this.loggerService.error(
-        `Error creating user with name ${userDto.name} and email ${userDto.email}`,
+        `Error creating user with name ${createUserDto.name} and email ${createUserDto.email}`,
         error,
       );
       throw error;
@@ -47,10 +50,10 @@ export class UsersService {
 
   async update(id: string, user: UpdateUserDto): Promise<User> {
     try {
-      const taskUpdated = await this.usersRepository.update(id, user);
+      const userUpdated = await this.usersRepository.update(id, user);
 
-      this.loggerService.info(`update user ${taskUpdated.id}`);
-      return taskUpdated;
+      this.loggerService.info(`update user ${userUpdated.name}`);
+      return userUpdated;
     } catch (error) {
       this.loggerService.error(`Error updating user ${user.name}`, error);
       throw error;

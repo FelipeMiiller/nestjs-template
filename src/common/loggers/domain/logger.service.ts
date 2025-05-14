@@ -50,16 +50,16 @@ export class LoggerService {
     context: string,
     UserId?: string,
   ): Promise<void> {
+    if (!this.loggersRepository) return;
+
     try {
-      if (this.loggersRepository) {
-        await this.loggersRepository.create({
-          level,
-          message,
-          context,
-          timestamp: new Date(),
-          UserId: UserId,
-        });
-      }
+      await this.loggersRepository.create({
+        level,
+        message,
+        context,
+        timestamp: new Date(),
+        ...(UserId && { UserId }),
+      });
     } catch (error) {
       console.error('Failed to create audit log:', error);
     }

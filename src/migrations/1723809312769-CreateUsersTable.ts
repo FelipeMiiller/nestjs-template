@@ -25,7 +25,7 @@ export class CreateUsersTable1723809312769 implements MigrationInterface {
             isPrimary: true,
             generationStrategy: 'uuid',
             isNullable: false,
-            default: 'uuid_generate_v7()',
+            default: 'uuid_generate_v4()',
           },
           {
             name: 'name',
@@ -54,6 +54,6 @@ export class CreateUsersTable1723809312769 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('tasks');
+    await queryRunner.dropTable('users');
   }
 }

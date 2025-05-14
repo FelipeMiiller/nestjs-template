@@ -1,41 +1,38 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/common/prisma/prisma.service';
-
+import { InjectModel } from '@nestjs/mongoose';
 import { ILoggersRepository } from './logger.repository.interface';
 import { CreateLoggerDto } from '../../dto/create-logger.dto';
+import { Logger } from '../logger.schema';
+import { Model, Types } from 'mongoose';
 
 @Injectable()
 export class LoggersRepository implements ILoggersRepository {
-  constructor(private readonly prisma: PrismaService) {}
-  async create(createLoggerDto: CreateLoggerDto) {
-    return this.prisma.logger.create({
-      data: createLoggerDto,
-    });
+  constructor(
+    @InjectModel(Logger.name)
+    private readonly loggerModel: Model<Logger>,
+  ) {}
+
+  async create(log: CreateLoggerDto): Promise<void> {
+    await this.loggerModel.create(log);
+  }
+  async findAll() {
+    return this.loggerModel.find().exec();
   }
 
-  async findAll() {
-    return this.prisma.logger.findMany();
-  }
   async findAllByLevel(level: string) {
-    return this.prisma.logger.findMany({
-      where: { level: level },
-    });
+    return this.loggerModel.find({ level }).exec();
   }
+
   async findAllByUserId(id: string) {
-    return this.prisma.logger.findMany({
-      where: { UserId: id, level: 'info' },
-    });
+    return this.loggerModel.find({ userId: id, level: 'info' }).exec();
   }
 
   async findAllByUserIdAndLevel(id: string, level: string) {
-    return this.prisma.logger.findMany({
-      where: { UserId: id, level: level },
-    });
+    return this.loggerModel.find({ userId: id, level }).exec();
   }
 
-  async findOne(id: number) {
-    return this.prisma.logger.findUnique({
-      where: { Id: id },
-    });
+  async findOne(id: string) {
+    if (!Types.ObjectId.isValid(id)) return null;
+    return this.loggerModel.findById(id).exec();
   }
 }

@@ -11,25 +11,18 @@ import redisConfig from 'src/config/redis.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { PrismaModule } from 'src/common/prisma/prisma.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import mongoConfig from 'src/config/mongo.config';
 
 @Module({
   imports: [
-    UploadS3Module,
-    UsersModule,
-    EventEmitterModule.forRoot(),
-    PrismaModule.forRootAsync({
-      imports: [ConfigModule],
+    ConfigModule.forRoot({
+      envFilePath: [pathEnv, '.env'],
       isGlobal: true,
-      useFactory: async (configService: ConfigService) => ({
-        datasources: {
-          db: {
-            url: configService.get('prisma.url'),
-          },
-        },
-      }),
-      inject: [ConfigService],
+      load: [appConfig, typeormConfig, mongoConfig],
     }),
-
+    EventEmitterModule.forRoot(),
+    PrismaModule,
     BullModule.forRootAsync({
       imports: [ConfigModule.forRoot({ load: [redisConfig] })],
       useFactory: (configDatabase: ConfigType<typeof redisConfig>) => ({
@@ -44,13 +37,18 @@ import { PrismaModule } from 'src/common/prisma/prisma.module';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => configService.get('typeorm'),
     }),
-    ,
-    LoggerModule,
-    ConfigModule.forRoot({
-      envFilePath: [pathEnv, '.env'],
-      isGlobal: true,
-      load: [appConfig, typeormConfig],
+    MongooseModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        return {
+          uri: configService.get<string>('mongo.uri'),
+          dbName: configService.get<string>('mongo.dbName'),
+        };
+      },
     }),
+    UploadS3Module,
+    LoggerModule,
+    UsersModule,
   ],
 
   exports: [ConfigModule],

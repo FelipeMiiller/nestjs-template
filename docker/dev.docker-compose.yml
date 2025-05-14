@@ -1,0 +1,135 @@
+version: '3'
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:17.0-alpine
+    environment:
+
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - '5432:5432'
+    expose:
+      - '5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  mongodb:
+    image: mongo:8.0.0
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-mongo}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-mongo}
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+
+
+  redis:
+    container_name: redis
+    image: redis:7.4.1-alpine3.20
+    ports:
+      - '6379:6379'
+    networks:
+      - app-network
+    command: redis-server --appendonly yes
+    
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Interface de administração do Redis
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    ports:
+      - "8081:8081"
+    environment:
+      # Configuração básica de conexão com o Redis
+      - REDIS_HOSTS=local:redis:6379
+      # Autenticação para acessar o Redis Commander
+      - HTTP_USER=admin                   # Usuário para acessar a interface web
+      - HTTP_PASSWORD=admin123            # Senha para acessar a interface web
+      # Se o Redis tiver senha, adicione:
+      # - REDIS_PASSWORD=suasenha         # Senha do Redis (se configurada)
+    networks:
+      - app-network
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # Interface de administração do BullMQ
+  bull-board:
+    image: deadly0/bull-board
+    ports:
+      - "3100:3100"
+    environment:
+      # Configuração da conexão com o Redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      # Prefixo usado nas filas do Bull (ajuste conforme seu projeto)
+      - BULL_PREFIX=bull
+      # Autenticação para acessar o Bull Board
+      - BULL_BOARD_USERNAME=admin         # Usuário para acessar a interface
+      - BULL_BOARD_PASSWORD=admin123      # Senha para acessar a interface
+      # Se o Redis tiver senha, adicione:
+      # - REDIS_PASSWORD=suasenha         # Senha do Redis (se configurada)
+    networks:
+      - app-network
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  minio:
+    container_name: minio
+    image: docker.io/bitnami/minio:2024
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+    volumes:
+      - minio_storage:/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-password}
+      MINIO_SERVER_ACCESS_KEY: ${MINIO_SERVER_ACCESS_KEY:-minio-access-key}
+      MINIO_SERVER_SECRET_KEY: ${MINIO_SERVER_SECRET_KEY:-minio-secret-key}
+      MINIO_SERVER_HOST: ${MINIO_SERVER_HOST:-minio-server}
+      MINIO_SERVER_URL: ${MINIO_SERVER_URL:-http://minio:9000}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+volumes:
+  postgres_data:
+    driver: local
+  minio_storage:
+    driver: local
+  mongodb_data:
+    driver: local
+

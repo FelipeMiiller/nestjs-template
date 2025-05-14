@@ -21,8 +21,8 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,
-      transform: true,
+      whitelist: true, // Remove properties not defined in the DTO
+      transform: true, // Transform properties to the type defined in the DTO
     }),
   );
   app.useGlobalFilters(new AllExceptionsFilter());
