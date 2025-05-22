@@ -19,6 +19,9 @@ export class Logger {
 
   @Prop({ required: true, default: () => new Date() })
   timestamp: Date;
+
+  @Prop({ type: Object, required: false })
+  meta?: object;
 }
 
 export const LoggerSchema = SchemaFactory.createForClass(Logger);

@@ -1,3 +1,5 @@
+/*
+
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateUserDto } from './dtos/create-users.dto';
 import { UsersService } from '../domain/users.service';
@@ -19,3 +21,4 @@ export class UserResolver {
     return this.usersService.create(args);
   }
 }
+*/

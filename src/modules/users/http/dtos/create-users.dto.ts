@@ -1,8 +1,12 @@
-import { Field, InputType, ObjectType } from '@nestjs/graphql';
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Field, InputType } from '@nestjs/graphql';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsStrongPassword, ValidateNested } from 'class-validator';
+import { TransformToHash } from 'src/common/shared/validators/TransformToHash.validator';
+import { ProfileInput } from './create-profile.dto';
+import { Roles } from '../../domain/entities/users.entity';
+
 
 @InputType()
-export class CreateUserDto {
+export class UserInput {
   @Field(() => String)
   @IsString()
   @IsOptional()
@@ -12,19 +16,31 @@ export class CreateUserDto {
   @IsEmail()
   @IsNotEmpty()
   readonly email: string;
-}
-
-@ObjectType()
-export class UserOutput {
-  @Field(() => String)
-  readonly name: string;
 
   @Field(() => String)
-  readonly email: string;
+  @IsString()
 
-  @Field(() => Date)
-  readonly createdAt: Date;
+  @IsNotEmpty()
+  @IsStrongPassword(
+    {
+      minLength: 8,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
+    }
+  )
+  @TransformToHash()
+  readonly password: string;
 
-  @Field(() => Date)
-  readonly updatedAt: Date;
+  @Field(() => String)
+  @IsOptional()
+  @IsEnum(Roles)
+  readonly role: Roles.USER;
+
+  @Field(() => ProfileInput)
+  @IsNotEmpty()
+  @ValidateNested()
+  readonly profile: ProfileInput;
 }
+

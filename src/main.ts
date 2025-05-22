@@ -1,11 +1,13 @@
-import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AppModule } from './ioC/app.module';
 import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-import { LoggerService } from './common/loggers/domain/logger.service';
 import { AllExceptionsFilter } from './common/filters/exception.filter';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { LoggerService } from './common/loggers/domain/logger.service';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,20 +17,29 @@ async function bootstrap() {
 
   app.enableCors({ origin: env.origin });
 
-  const configSwagger = new DocumentBuilder().setTitle('Template-Nest').setVersion('1.0').build();
+  const configSwagger = new DocumentBuilder()
+    .setTitle('Template-Nest')
+    .setDescription('Template-Nest')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
   const document = SwaggerModule.createDocument(app, configSwagger);
   SwaggerModule.setup('api', app, document);
 
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // Remove properties not defined in the DTO
-      transform: true, // Transform properties to the type defined in the DTO
+      whitelist: true,
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+      forbidNonWhitelisted: true,
     }),
   );
-  app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalInterceptors(new TransformInterceptor(), new LoggingInterceptor(logger));
+  app.useGlobalFilters(new AllExceptionsFilter(logger));
   app.enableShutdownHooks();
 
   await app.listen(env.port);
-  logger.info(`Application is running on port ${env.port}`, true);
+  logger.info(`Application is running on port ${env.port}`);
 }
 bootstrap();

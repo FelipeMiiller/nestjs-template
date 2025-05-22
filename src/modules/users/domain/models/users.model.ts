@@ -1,4 +1,6 @@
-import { Column, CreateDateColumn, Entity, Index, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, UpdateDateColumn, OneToOne } from 'typeorm';
+import { Roles } from '../entities/users.entity';
+import { Profile } from './profile.model';
 
 @Entity({ name: 'users' })
 export class User {
@@ -7,11 +9,20 @@ export class User {
 
   @Index()
   @Column({ nullable: false })
-  public name: string;
+  public email: string;
+
+  @Column({ nullable: true })
+  public password: string | null;
 
   @Index()
+  @Column({ nullable: true })
+  public hashRefreshToken: string | null;
+
   @Column({ nullable: false })
-  public email: string;
+  public role: Roles;
+
+  @OneToOne(() => Profile, (profile) => profile.user, { cascade: true, eager: true })
+  profile: Profile;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
   createdAt: Date;

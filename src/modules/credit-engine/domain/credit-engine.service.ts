@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import { Get, Injectable } from '@nestjs/common';
 
 @Injectable()

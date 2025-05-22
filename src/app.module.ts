@@ -3,7 +3,7 @@ import { ConfigModule, ConfigType } from '@nestjs/config';
 import appConfig, { pathEnv } from 'src/config/app.config';
 import typeormConfig from 'src/config/typeorm.config';
 import { LoggerModule } from 'src/common/loggers/logger.module';
-import { UsersModule } from 'src/modules/users/users.module';
+//import { UsersModule } from 'src/modules/users/users.module';
 import { UploadS3Module } from 'src/common/s3/uploader3.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { BullModule } from '@nestjs/bullmq';
@@ -48,7 +48,7 @@ import mongoConfig from 'src/config/mongo.config';
     }),
     UploadS3Module,
     LoggerModule,
-    UsersModule,
+    // UsersModule,
   ],
 
   exports: [ConfigModule],

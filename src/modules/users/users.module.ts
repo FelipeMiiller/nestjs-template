@@ -8,9 +8,9 @@ import { LoggerModule } from 'src/common/loggers/logger.module';
 import { UsersController } from './http/users.controller';
 import { UsersService } from './domain/users.service';
 import { USERS_REPOSITORY_TOKEN } from './domain/repositories/user.repository.interface';
-import { UsersTypeOrmRepository } from './domain/repositories/users.typeorm.repository';
 import { User } from './domain/entities/users.entity';
 import { BullModule } from '@nestjs/bullmq';
+import { UsersTypeOrmRepository } from './domain/repositories/users.typeorm.repository';
 
 @Module({
   imports: [
@@ -26,6 +26,6 @@ import { BullModule } from '@nestjs/bullmq';
       useClass: UsersTypeOrmRepository,
     },
   ],
-  //exports: [USERS_REPOSITORY_TOKEN],
+  exports: [USERS_REPOSITORY_TOKEN],
 })
 export class UsersModule {}

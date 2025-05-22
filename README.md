@@ -2,6 +2,11 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 
+# NestJS Template
+
+Este template oferece uma base robusta e profissional para desenvolvimento de APIs com NestJS, incluindo autenticação JWT, estrutura modular, testes, integração com PostgreSQL, e boas práticas de arquitetura.
+
+
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 
@@ -22,28 +27,59 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## 🚀 Tecnologias Principais
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **NestJS 10+** — Framework Node.js para APIs escaláveis
+- **TypeScript** — Tipagem estática
+- **PostgreSQL** — Banco de dados relacional
+- **Prisma ORM** ou **TypeORM** — Integração com banco
+- **JWT** — Autenticação
+- **Jest** — Testes unitários e e2e
+- **ESLint & Prettier** — Padronização de código
 
-## Project setup
 
-```bash
-$ npm install
+## 📁 Estrutura de Pastas
+
+```
+src/
+├── modules/        # Módulos de domínio (auth, user, etc.)
+├── common/         # Utilitários, decorators, filtros globais
+├── config/         # Configurações centralizadas
+├── prisma/         # Integração com banco (ou database/)
+└── main.ts         # Bootstrap da aplicação
+
+test/               # Testes unitários e e2e
 ```
 
-## Compile and run the project
+
+## ⚙️ Scripts Disponíveis
 
 ```bash
-# development
-$ npm run start
+# Iniciar em modo desenvolvimento
+npm run start:dev
 
-# watch mode
-$ npm run start:dev
+# Build de produção
+npm run build
 
-# production mode
-$ npm run start:prod
+# Iniciar em produção
+npm run start:prod
+
+# Lint
+npm run lint
+
+# Format
+npm run format
+
+# Testes unitários
+yarn test
+
+# Testes e2e
+yarn test:e2e
+
+# Cobertura de testes
+yarn test:cov
 ```
+
 
 ## Run tests
 
@@ -58,18 +94,19 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## 🤝 Contribuição
 
-```bash
-$ npm install -g mau
-$ mau deploy
-```
+1. Faça um fork do repositório
+2. Crie uma branch (`git checkout -b feature/sua-feature`)
+3. Commit suas mudanças (`git commit -m 'feat: minha feature'`)
+4. Push para a branch (`git push origin feature/sua-feature`)
+5. Abra um Pull Request
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## 📝 Licença
+
+Baseado em [NestJS](https://nestjs.com/) — MIT License
 
 ## Resources
 

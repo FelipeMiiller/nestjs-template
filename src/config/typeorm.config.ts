@@ -1,7 +1,6 @@
 import { registerAs } from '@nestjs/config';
 import { CreateUsersTable1723809312769 } from 'src/migrations/1723809312769-CreateUsersTable';
 
-import { DataSource, DataSourceOptions } from 'typeorm';
 import { config as dotenvConfig } from 'dotenv';
 import { pathEnv } from './app.config';
 import { User } from 'src/modules/users/domain/entities/users.entity';
@@ -12,7 +11,7 @@ const ConnectionDatabaseType = {
   postgres: 'postgres',
 };
 
-const config = {
+export const config = {
   type: ConnectionDatabaseType[process.env.TYPEORM_TYPE],
   host: process.env.TYPEORM_HOST,
   username: process.env.TYPEORM_USERNAME,
@@ -27,5 +26,3 @@ const config = {
 };
 
 export default registerAs('typeorm', () => config);
-
-export const connectionSource = new DataSource(config as DataSourceOptions);

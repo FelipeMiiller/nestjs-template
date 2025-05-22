@@ -7,24 +7,43 @@ export enum LogLevel {
   INFO = 'info',
   WARN = 'warn',
   ERROR = 'error',
+  DEBUG = 'debug',
 }
 
 interface LogMetadata {
   context?: string;
-  stackTrace?: any;
+
   idempotency?: string;
 }
 
 @Injectable({ scope: Scope.TRANSIENT })
 export class LoggerService {
   private _idempotencyKey: string;
-  private _contextName = 'Default';
+  private _contextName = 'Logger';
   private readonly logger: Logger = createLogger();
 
   constructor(@Optional() private readonly loggersRepository?: LoggersRepository) {
     this.logger.configure({
       transports: [this.logTransportConsole()],
       exitOnError: false,
+    });
+  }
+
+  private logTransportConsole() {
+    return new transports.Console({
+      handleExceptions: true,
+      format: format.combine(
+        format.timestamp(),
+        format.printf((info) => {
+          const { timestamp, level, message, meta } = info;
+          const context = (meta as { context?: string })?.context ?? '';
+
+          return (
+            `${timestamp} [${level.toLocaleUpperCase()}] [${context ?? ''}] ` +
+            `${message} ${JSON.stringify(meta)}`
+          );
+        }),
+      ),
     });
   }
 
@@ -48,7 +67,8 @@ export class LoggerService {
     level: string,
     message: string,
     context: string,
-    UserId?: string,
+    meta?: LogMetadata,
+    userId?: string,
   ): Promise<void> {
     if (!this.loggersRepository) return;
 
@@ -58,18 +78,19 @@ export class LoggerService {
         message,
         context,
         timestamp: new Date(),
-        ...(UserId && { UserId }),
+        ...(userId && { userId }),
+        ...(meta && { meta }),
       });
     } catch (error) {
       console.error('Failed to create audit log:', error);
     }
   }
 
-  error(message: string, stackTrace?: any, auditable = false, UserId?: string): void {
+  error(message: string, meta?: Record<string, unknown>, auditable = false, userId?: string): void {
     const metadata: LogMetadata = {
       context: this._contextName,
-      stackTrace,
       idempotency: this._idempotencyKey,
+      ...(meta || {}),
     };
 
     this.logger.log({
@@ -79,15 +100,17 @@ export class LoggerService {
     });
 
     if (auditable) {
-      this.createAuditLog(LogLevel.ERROR, message, this._contextName, UserId);
+      this.createAuditLog(LogLevel.ERROR, message, this._contextName, metadata, userId);
     }
   }
 
-  warn(message: string, auditable = false, UserId?: string): void {
+  warn(message: string, meta?: Record<string, unknown>, auditable = false, userId?: string): void {
     const metadata: LogMetadata = {
       context: this._contextName,
       idempotency: this._idempotencyKey,
+      ...(meta || {}),
     };
+
     this.logger.log({
       level: LogLevel.WARN,
       message,
@@ -95,14 +118,15 @@ export class LoggerService {
     });
 
     if (auditable) {
-      this.createAuditLog(LogLevel.WARN, message, this._contextName, UserId);
+      this.createAuditLog(LogLevel.WARN, message, this._contextName, metadata, userId);
     }
   }
 
-  info(message: string, auditable = false, UserId?: string): void {
+  info(message: string, meta?: Record<string, unknown>, auditable = false, userId?: string): void {
     const metadata: LogMetadata = {
       context: this._contextName,
       idempotency: this._idempotencyKey,
+      ...(meta || {}),
     };
 
     this.logger.log({
@@ -112,25 +136,25 @@ export class LoggerService {
     });
 
     if (auditable) {
-      this.createAuditLog(LogLevel.INFO, message, this._contextName, UserId);
+      this.createAuditLog(LogLevel.INFO, message, this._contextName, metadata, userId);
     }
   }
 
-  private logTransportConsole() {
-    return new transports.Console({
-      handleExceptions: true,
-      format: format.combine(
-        format.timestamp(),
-        format.printf((info) => {
-          const { timestamp, level, message, meta } = info;
-          const context = (meta as { context?: string })?.context ?? '';
+  debug(message: string, meta?: Record<string, unknown>, auditable = false, userId?: string): void {
+    const metadata: LogMetadata = {
+      context: this._contextName,
+      idempotency: this._idempotencyKey,
+      ...(meta || {}),
+    };
 
-          return (
-            `${timestamp} [${level.toLocaleUpperCase()}] [${context ?? ''}] ` +
-            `${message} ${JSON.stringify(meta)}`
-          );
-        }),
-      ),
+    this.logger.log({
+      level: LogLevel.DEBUG,
+      message,
+      meta: metadata,
     });
+
+    if (auditable) {
+      this.createAuditLog(LogLevel.DEBUG, message, this._contextName, metadata, userId);
+    }
   }
 }

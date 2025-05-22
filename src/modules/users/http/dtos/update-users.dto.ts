@@ -4,12 +4,17 @@ import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 @InputType()
 export class UpdateUserDto {
   @Field(() => String)
-  @IsString()
-  @IsOptional()
-  readonly name: string;
-
-  @Field(() => String)
   @IsEmail()
   @IsNotEmpty()
   readonly email: string;
+
+  @Field(() => String)
+  @IsString()
+  @IsOptional()
+  readonly password: string;
+
+  @Field(() => String)
+  @IsString()
+  @IsOptional()
+  readonly hashRefreshToken: string;
 }
