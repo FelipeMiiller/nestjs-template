@@ -24,3 +24,14 @@ export interface GoogleProfile {
     email_verified: boolean;
   };
 }
+
+export interface Payload {
+  email: string;
+  sub: string;
+  role: string;
+}
+
+export interface Login {
+  accessToken: string;
+  refreshToken: string;
+}

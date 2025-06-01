@@ -1,10 +1,7 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
-
+import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-
 import { AuthGuard } from '@nestjs/passport';
 import type { Request } from 'express';
-
 import { IS_PUBLIC_KEY } from 'src/modules/auth/domain/decorator/public.decorator';
 import { AuthService } from '../auth.service';
 

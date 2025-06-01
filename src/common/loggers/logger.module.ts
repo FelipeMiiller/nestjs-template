@@ -15,14 +15,7 @@ import { SlackLoggerService } from './domain/slack-logger.service';
     MongooseModule.forFeature([{ name: Logger.name, schema: LoggerSchema }]),
     ConfigModule.forFeature(slackConfig),
   ],
-  providers: [
-    LoggerService,
-    LoggersRepository,
-    {
-      provide: SlackLoggerService,
-      useFactory: (config: ConfigType<typeof slackConfig>) => new SlackLoggerService(config),
-    },
-  ],
+  providers: [LoggerService, LoggersRepository, SlackLoggerService],
   exports: [LoggerService],
   controllers: [LoggersController],
 })

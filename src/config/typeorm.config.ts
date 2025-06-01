@@ -1,11 +1,7 @@
 import { registerAs } from '@nestjs/config';
 import { CreateUsersTable1723809312769 } from 'src/migrations/1723809312769-CreateUsersTable';
-
-import { config as dotenvConfig } from 'dotenv';
-import { pathEnv } from './app.config';
-import { User } from 'src/modules/users/domain/entities/users.entity';
-
-dotenvConfig({ path: pathEnv });
+import { ProfileEntity } from 'src/modules/users/domain/entities/profile.entities';
+import { UserEntity } from 'src/modules/users/domain/entities/users.entities';
 
 const ConnectionDatabaseType = {
   postgres: 'postgres',
@@ -18,7 +14,7 @@ export const config = {
   password: process.env.TYPEORM_PASSWORD,
   database: process.env.TYPEORM_DATABASE,
   port: +process.env.TYPEORM_PORT,
-  entities: [User],
+  entities: [UserEntity, ProfileEntity],
   migrations: [CreateUsersTable1723809312769],
   synchronize: false,
   logging: true,

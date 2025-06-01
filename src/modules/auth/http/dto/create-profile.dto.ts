@@ -1,8 +1,8 @@
-import { Field, InputType } from '@nestjs/graphql';
+
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
-export class ProfileInput {
+export class ProfileInputAuth {
   @ApiProperty({
     description: 'Nome do perfil',
     example: 'João',
@@ -24,24 +24,4 @@ export class ProfileInput {
   @IsString()
   @MaxLength(255)
   readonly LastName?: string;
-
-  @ApiPropertyOptional({
-    description: 'Biografia do usuário',
-    example: 'Desenvolvedor apaixonado por tecnologia',
-    nullable: true,
-  })
-  @IsOptional()
-  @IsString()
-  readonly Bio?: string;
-
-  @ApiPropertyOptional({
-    description: 'URL da imagem de perfil',
-    example: 'https://example.com/avatar.jpg',
-    maxLength: 255,
-    nullable: true,
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(255)
-  readonly AvatarUrl?: string;
 }

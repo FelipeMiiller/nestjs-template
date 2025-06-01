@@ -1847,6 +1847,30 @@
   dependencies:
     undici-types "~6.21.0"
 
+"@types/passport-local@^1.0.38":
+  version "1.0.38"
+  resolved "https://registry.yarnpkg.com/@types/passport-local/-/passport-local-1.0.38.tgz#8073758188645dde3515808999b1c218a6fe7141"
+  integrity sha512-nsrW4A963lYE7lNTv9cr5WmiUD1ibYJvWrpE13oxApFsRt77b0RdtZvKbCdNIY4v/QZ6TRQWaDDEwV1kCTmcXg==
+  dependencies:
+    "@types/express" "*"
+    "@types/passport" "*"
+    "@types/passport-strategy" "*"
+
+"@types/passport-strategy@*":
+  version "0.2.38"
+  resolved "https://registry.yarnpkg.com/@types/passport-strategy/-/passport-strategy-0.2.38.tgz#482abba0b165cd4553ec8b748f30b022bd6c04d3"
+  integrity sha512-GC6eMqqojOooq993Tmnmp7AUTbbQSgilyvpCYQjT+H6JfG/g6RGc7nXEniZlp0zyKJ0WUdOiZWLBZft9Yug1uA==
+  dependencies:
+    "@types/express" "*"
+    "@types/passport" "*"
+
+"@types/passport@*":
+  version "1.0.17"
+  resolved "https://registry.yarnpkg.com/@types/passport/-/passport-1.0.17.tgz#718a8d1f7000ebcf6bbc0853da1bc8c4bc7ea5e6"
+  integrity sha512-aciLyx+wDwT2t2/kJGJR2AEeBz0nJU4WuRX04Wu9Dqc5lSUtwu0WERPHYsLhF9PtseiAMPBGNUOtFjxZ56prsg==
+  dependencies:
+    "@types/express" "*"
+
 "@types/qs@*":
   version "6.9.18"
   resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.9.18.tgz#877292caa91f7c1b213032b34626505b746624c2"
@@ -6898,6 +6922,11 @@ uint8array-extras@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/uint8array-extras/-/uint8array-extras-1.4.0.tgz#e42a678a6dd335ec2d21661333ed42f44ae7cc74"
   integrity sha512-ZPtzy0hu4cZjv3z5NW9gfKnNLjoz4y6uv4HlelAjDK7sY/xOkKZv9xK/WQpcsBB3jEybChz9DPC2U/+cusjJVQ==
+
+ulid@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/ulid/-/ulid-3.0.0.tgz#1170fd6865121bb3b912c32487c9c81149f18ccb"
+  integrity sha512-yvZYdXInnJve6LdlPIuYmURdS2NP41ZoF4QW7SXwbUKYt53+0eDAySO+rGSvM2O/ciuB/G+8N7GQrZ1mCJpuqw==
 
 undici-types@~6.21.0:
   version "6.21.0"

@@ -38,6 +38,25 @@ Este template oferece uma base robusta e profissional para desenvolvimento de AP
 - **ESLint & Prettier** — Padronização de código
 
 
+## 🔑 Identificadores Únicos com ULID
+
+O projeto utiliza **ULID** (Universally Unique Lexicographically Sortable Identifier) como identificador único para entidades principais, em substituição ao UUID tradicional. ULIDs são ordenáveis por tempo, seguros para uso distribuído e facilitam queries e ordenação no banco de dados.
+
+**Vantagens do ULID:**
+- Ordenação temporal nativa
+- Compatível com bancos modernos
+- Mais amigável para logs e URLs do que UUID
+
+**Exemplo de uso:**
+```typescript
+import { ulid } from 'ulid';
+
+const newId = ulid(); // Exemplo: 01HZ7YF8T1X3J6Y2YB4K2K3QZC
+```
+
+As migrations e entidades já estão preparadas para trabalhar com ULID como chave primária.
+
+
 ## 📁 Estrutura de Pastas
 
 ```

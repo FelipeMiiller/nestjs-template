@@ -14,19 +14,21 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-import { Public } from 'src/modules/auth/domain/decorator/public.decorator';
-import { UsersService } from '../users/domain/users.service';
-import { GoogleUserAuthGuard } from './domain/guards/googleUser-auth.guard';
-import { JwtAuthGuard } from './domain/guards/jwt-auth.guard';
-import { LocalUserAuthGuard } from './domain/guards/localUser-auth.guard';
-import { RefreshAuthGuard } from './domain/guards/refresh-auth.guard';
-import { UserInput } from '../users/http/dtos/create-users.dto';
-import { UserOutput } from '../users/http/dtos/output-users.dto';
+import { Public } from '../domain/decorator/public.decorator';
+import { AuthService } from '../domain/auth.service';
+import { UsersService } from 'src/modules/users/domain/users.service';
+import { LocalUserAuthGuard } from '../domain/guards/localUser-auth.guard';
+import { Login, Payload } from '../domain/types';
+import { GoogleUserAuthGuard } from '../domain/guards/googleUser-auth.guard';
+import { RefreshAuthGuard } from '../domain/guards/refresh-auth.guard';
+import { JwtAuthGuard } from '../domain/guards/jwt-auth.guard';
 import { instanceToPlain } from 'class-transformer';
-import { Roles, User } from '../users/domain/entities/users.entity';
-import { AuthService, Login, Payload } from './domain/auth.service';
+import { Roles, User } from 'src/modules/users/domain/models/users.models';
+import { UserOutput } from 'src/modules/users/http/dtos/output-users.dto';
+import { UserInputAuth } from './dto/create-users.dto';
 
 @ApiTags('auth')
+@UseGuards(JwtAuthGuard)
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -35,20 +37,17 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {}
 
-  // User
-  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   @Public()
   @Post('user/signup')
-  async create(@Body() userDto: Omit<UserInput, 'role'>): Promise<UserOutput> {
+  async create(@Body() userDto: UserInputAuth): Promise<UserOutput> {
     const user = await this.usersService.create({
       ...userDto,
-      role: Roles.USER,
+      Role: Roles.USER,
     });
     return instanceToPlain<User>(user) as UserOutput;
   }
 
-  @ApiBearerAuth()
   @Public()
   @UseGuards(LocalUserAuthGuard)
   @Post('user/signin')
@@ -56,7 +55,6 @@ export class AuthController {
     return this.authService.loginUser(req['user']);
   }
 
-  @ApiBearerAuth()
   @Public()
   @UseGuards(GoogleUserAuthGuard)
   @Get('user/google/signin')
@@ -81,9 +79,9 @@ export class AuthController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Post('user/logout')
+  @Post('user/signout')
   async logoutUser(@Req() req: Request) {
-    return this.authService.signOutUser(req['user'].id);
+    return this.authService.signOutUser(req['user'].sub);
   }
 
   @ApiBearerAuth()
@@ -97,5 +95,4 @@ export class AuthController {
     }
     return instanceToPlain(user) as UserOutput;
   }
-
 }

@@ -1,18 +1,18 @@
 import {
   IsEmail,
-  IsEnum,
+
   IsNotEmpty,
-  IsOptional,
+
   IsString,
   IsStrongPassword,
   ValidateNested,
 } from 'class-validator';
-import { TransformToHash } from 'src/common/shared/validators/TransformToHash.validator';
-import { ProfileInput } from './create-profile.dto';
-import { Roles } from 'src/modules/users/domain/models/users.models';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class UserInput {
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ProfileInputAuth } from './create-profile.dto';
+
+
+export class UserInputAuth {
   @ApiProperty({
     description: 'User email address',
     example: 'john@email.com',
@@ -38,21 +38,11 @@ export class UserInput {
   })
   readonly Password: string;
 
-  @ApiPropertyOptional({
-    description: 'User role',
-    enum: Roles,
-    example: Roles.USER,
-    default: Roles.USER,
-  })
-  @IsOptional()
-  @IsEnum(Roles)
-  readonly Role: Roles.USER;
-
   @ApiProperty({
     description: 'User profile',
-    type: () => ProfileInput,
+    type: () => ProfileInputAuth,
   })
   @IsNotEmpty()
   @ValidateNested()
-  readonly Profile: ProfileInput;
+  readonly Profile: ProfileInputAuth;
 }

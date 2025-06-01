@@ -1,27 +1,51 @@
-import { Body, Controller, Get, Post, Param, Query, Patch, Delete } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Param,
+  Query,
+  Patch,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { instanceToPlain } from 'class-transformer';
-import { CreateUserDto } from './dtos/create-users.dto';
 import { UserOutput } from './dtos/output-users.dto';
 import { UsersService } from '../domain/users.service';
-import { UpdateUserDto } from './dtos/update-users.dto';
-import { User } from '../domain/entities/users.entity';
+import { UpdateUser } from './dtos/update-users.dto';
+import { UserInput } from './dtos/create-users.dto';
+import { RolesGuards } from 'src/modules/auth/domain/decorator/roles.decorator';
+import { JwtAuthGuard } from 'src/modules/auth/domain/guards/jwt-auth.guard';
+import { Roles, User } from '../domain/models/users.models';
 
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @RolesGuards([Roles.ADMIN, Roles.MODERATOR])
   @Post()
   @ApiOperation({ summary: 'Cria um novo usuário' })
-  @ApiBody({ type: CreateUserDto })
+  @ApiBody({ type: UserInput })
   @ApiResponse({ status: 201, description: 'Usuário criado com sucesso', type: UserOutput })
   @ApiResponse({ status: 409, description: 'Usuário já existe' })
-  async create(@Body() userDto: CreateUserDto): Promise<UserOutput> {
+  async create(@Body() userDto: UserInput): Promise<UserOutput> {
     const user = await this.usersService.create(userDto);
     return instanceToPlain<User>(user) as UserOutput;
   }
 
+  @RolesGuards([Roles.ADMIN, Roles.MODERATOR])
   @Get()
   @ApiOperation({ summary: 'Lista todos os usuários (paginado)' })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -35,6 +59,7 @@ export class UsersController {
     return users.map((u) => instanceToPlain<User>(u)) as UserOutput[];
   }
 
+  @RolesGuards([Roles.ADMIN, Roles.MODERATOR])
   @Get(':id')
   @ApiOperation({ summary: 'Busca usuário por ID' })
   @ApiParam({ name: 'id', type: String })
@@ -46,6 +71,7 @@ export class UsersController {
     return instanceToPlain<User>(user) as UserOutput;
   }
 
+  @RolesGuards([Roles.ADMIN, Roles.MODERATOR])
   @Get('email/:email')
   @ApiOperation({ summary: 'Busca usuário por email' })
   @ApiParam({ name: 'email', type: String })
@@ -57,17 +83,19 @@ export class UsersController {
     return instanceToPlain<User>(user) as UserOutput;
   }
 
+  @RolesGuards([Roles.ADMIN, Roles.MODERATOR])
   @Patch(':id')
   @ApiOperation({ summary: 'Atualiza usuário por ID' })
   @ApiParam({ name: 'id', type: String })
-  @ApiBody({ type: UpdateUserDto })
+  @ApiBody({ type: UpdateUser })
   @ApiResponse({ status: 200, description: 'Usuário atualizado', type: UserOutput })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
-  async update(@Param('id') id: string, @Body() dto: UpdateUserDto): Promise<UserOutput> {
+  async update(@Param('id') id: string, @Body() dto: UpdateUser): Promise<UserOutput> {
     const user = await this.usersService.update(id, dto);
     return instanceToPlain<User>(user) as UserOutput;
   }
 
+  @RolesGuards([Roles.ADMIN, Roles.MODERATOR])
   @Delete(':id')
   @ApiOperation({ summary: 'Remove usuário por ID' })
   @ApiParam({ name: 'id', type: String })

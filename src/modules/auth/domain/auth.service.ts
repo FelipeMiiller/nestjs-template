@@ -1,63 +1,48 @@
-
 import {
-  BadRequestException,
   Inject,
   Injectable,
   UnauthorizedException,
+  ConflictException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
-import { compare } from 'bcrypt';
+
 import jwtConfig from 'src/config/jwt.config';
 import refreshJwtConfig from 'src/config/refresh-jwt.config';
-import { User } from 'src/modules/users/domain/entities/users.entity';
-import {
-  USERS_REPOSITORY_TOKEN,
-  UsersRepository,
-} from 'src/modules/users/domain/repositories/user.repository.interface';
-
-export interface Payload {
-  email: string;
-  sub: string;
-  role: string;
-}
-
-export interface Login {
-  accessToken: string;
-  refreshToken: string;
-}
+import { User } from 'src/modules/users/domain/models/users.models';
+import { ProfilesService } from 'src/modules/users/domain/profiles.service';
+import { UsersService } from 'src/modules/users/domain/users.service';
+import { Login, Payload } from './types';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject(USERS_REPOSITORY_TOKEN)
-    private readonly usersRepository: UsersRepository,
+    private readonly usersService: UsersService,
+    private readonly profilesService: ProfilesService,
     private readonly jwtService: JwtService,
     @Inject(refreshJwtConfig.KEY)
     private readonly refresTokenConfig: ConfigType<typeof refreshJwtConfig>,
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
-  ) { }
-
-
-
-
+  ) {}
 
   async validateUser(email: string, password: string): Promise<User> {
     if (!email || !password) {
       throw new UnauthorizedException('Email and password are required');
     }
 
-    const user = await this.usersRepository.findOne({ where: { email } });
+    const user = await this.usersService.findOneByEmail(email);
+    console.log('user', user);
     if (!user) {
-      throw new UnauthorizedException(`Not found ${email}`);
+      throw new NotFoundException(`User not found ${email}`);
     }
-    if (user.password === null || user.password === undefined) {
-      throw new BadRequestException(`Not found password: ${email}`);
+    if (user.Password === null || user.Password === undefined) {
+      throw new ConflictException(`User not found password: ${email}`);
     }
 
-    const passwordMatch = await compare(password, user?.password);
+    const passwordMatch = await argon2.verify(user.Password, password);
     if (!passwordMatch) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -72,25 +57,23 @@ export class AuthService {
     segundoNome: string;
   }): Promise<User> {
     const { email } = googleUser;
-    console.log('email', email);
+
     if (!email) {
       throw new UnauthorizedException('Email required');
     }
-    const user = await this.usersRepository.findOne({ where: { email } });
+    const user = await this.usersService.findOneByEmail(email);
 
-    if (!user) {
+    if (!user || user === null) {
       throw new UnauthorizedException(`Not found ${email}`);
     }
 
-    if (!user.profile) {
+    if (!user.Profile) {
       throw new UnauthorizedException(`Not found perfil ${email}`);
     }
 
-    if (!user.profile.avatarUrl) {
-      await this.usersRepository.update(user.id, {
-        profile: {
-          avatarUrl: googleUser.avatarUrl,
-        },
+    if (!user.Profile.AvatarUrl) {
+      await this.profilesService.update(user.Profile.Id, {
+        avatarUrl: googleUser.avatarUrl,
       });
     }
     return user;
@@ -98,15 +81,15 @@ export class AuthService {
 
   async loginUser(user: User): Promise<Login> {
     const payload: Payload = {
-      sub: user.id,
-      email: user.email,
-      role: user.role,
+      sub: user.Id,
+      email: user.Email,
+      role: user.Role,
     };
 
     const { accessToken, refreshToken } = await this.generateToken(payload);
     const hashRefreshToken = await argon2.hash(refreshToken);
 
-    await this.usersRepository.update(user.id, { hashRefreshToken });
+    await this.usersService.update(user.Id, { HashRefreshToken: hashRefreshToken });
 
     return {
       accessToken: accessToken,
@@ -115,7 +98,7 @@ export class AuthService {
   }
 
   async updateRefreshTokenUser(id: string, refreshToken: string) {
-    return this.usersRepository.update(id, { hashRefreshToken: refreshToken });
+    return this.usersService.update(id, { HashRefreshToken: refreshToken });
   }
 
   async generateToken(payload: Payload): Promise<{ accessToken: string; refreshToken: string }> {
@@ -128,7 +111,6 @@ export class AuthService {
   }
 
   async refreshToken({ refreshToken }: Omit<Login, 'accessToken'>): Promise<Login> {
-
     const payload: Payload = await this.verifyRefreshToken(refreshToken);
     const accessToken = await this.jwtService.signAsync(payload);
 
@@ -149,11 +131,11 @@ export class AuthService {
 
       await this.verifyRefreshToken(refreshToken);
 
-      const user = await this.usersRepository.findOne({ where: { id } });
-      if (!user || !user.hashRefreshToken) {
+      const user = await this.usersService.findOneById(id);
+      if (!user || !user.HashRefreshToken) {
         throw new UnauthorizedException('Invalid refresh token');
       }
-      const refreshtTokenMatches = await argon2.verify(user.hashRefreshToken, refreshToken);
+      const refreshtTokenMatches = await argon2.verify(user.HashRefreshToken, refreshToken);
       if (!refreshtTokenMatches) {
         throw new UnauthorizedException('Invalid refresh token');
       }
@@ -166,15 +148,15 @@ export class AuthService {
   async validateJwt(payload: Payload): Promise<Payload> {
     const { sub } = payload;
 
-    const user = await this.usersRepository.findOne({ where: { id: sub } });
-    if (!user || !user.hashRefreshToken) {
+    const user = await this.usersService.findOneById(sub);
+    if (!user || !user.HashRefreshToken) {
       throw new UnauthorizedException('User not found');
     }
     return { ...payload, ...user };
   }
 
   async signOutUser(id: string) {
-    await this.usersRepository.update(id, { hashRefreshToken: null });
+    await this.usersService.update(id, { HashRefreshToken: null });
   }
 
   async verifyToken(token: string): Promise<Payload> {
@@ -196,7 +178,6 @@ export class AuthService {
       algorithms: [this.refresTokenConfig.algorithm],
     });
   }
-
 
   async decodeToken(token: string): Promise<Payload> {
     return this.jwtService.decode(token);

@@ -4,11 +4,11 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { Queue } from 'bullmq';
 import { UserInput } from '../http/dtos/create-users.dto';
 import { LoggerService } from 'src/common/loggers/domain/logger.service';
-import { UpdateUserDto } from '../http/dtos/update-users.dto';
 import { UserCreatedEvent } from 'src/common/events/user-created.event';
-import { USERS_REPOSITORY_TOKEN, UsersRepository } from './repositories/user.repository.interface';
-import { Roles, User } from './entities/users.entity';
-
+import { UpdateUser } from '../http/dtos/update-users.dto';
+import { User } from './models/users.models';
+import { USERS_REPOSITORY_TOKEN, UsersRepository } from './repositories/users.repository.interface';
+import * as argon2 from 'argon2';
 @Injectable()
 export class UsersService {
   constructor(
@@ -22,18 +22,17 @@ export class UsersService {
   }
 
   async create(createUserDto: UserInput): Promise<User> {
-    const { profile, ...user } = createUserDto;
-   const create = await this.usersRepository.create({
+    const { Profile, Password, ...user } = createUserDto;
+    const hashedPassword = await argon2.hash(Password);
+    const create = await this.usersRepository.create({
       ...user,
-      profile,
-      hashRefreshToken: null,
+      Password: hashedPassword,
+      Profile: Profile,
+      HashRefreshToken: null,
     });
-    this.eventEmitter.emit('user.created', new UserCreatedEvent(profile.name, user.email));
-    await this.usersQueue.add('user.created', new UserCreatedEvent(profile.name, user.email));
-    await this.usersQueue.add(
-      'user.email.send',
-      new UserCreatedEvent(profile.name, user.email),
-    );
+    this.eventEmitter.emit('user.created', new UserCreatedEvent(Profile.Name, user.Email));
+    await this.usersQueue.add('user.created', new UserCreatedEvent(Profile.Name, user.Email));
+    await this.usersQueue.add('user.email.send', new UserCreatedEvent(Profile.Name, user.Email));
     return create;
   }
 
@@ -44,10 +43,10 @@ export class UsersService {
     this.loggerService.info(`USER CREATED --> EVENT EMITTER ${event.email}`);
   }
 
-  async update(id: string, user: UpdateUserDto): Promise<User> {
+  async update(id: string, user: UpdateUser): Promise<User> {
     const userUpdated = await this.usersRepository.update(id, user);
 
-    this.loggerService.info(`update user ${userUpdated.email}`);
+    this.loggerService.info(`update user ${userUpdated.Email}`);
     return userUpdated;
   }
 
@@ -58,16 +57,16 @@ export class UsersService {
     return this.usersRepository.findMany({
       skip,
       take: limit,
-      relations: { profile: true },
+      relations: { Profile: true },
     });
   }
 
-  async findOneById(id: string): Promise<User | null> {
-    return this.usersRepository.findOne({ where: { id },relations: { profile: true } });
+  async findOneById(Id: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { Id }, relations: { Profile: true } });
   }
 
-  async findOneByEmail(email: string): Promise<User | null> {
-    return this.usersRepository.findOne({ where: { email },relations: { profile: true } });
+  async findOneByEmail(Email: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { Email }, relations: { Profile: true } });
   }
 
   async delete(id: string): Promise<void> {

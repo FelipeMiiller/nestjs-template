@@ -1,28 +1,30 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
-import appConfig, { pathEnv } from 'src/config/app.config';
-import typeormConfig from 'src/config/typeorm.config';
 import { LoggerModule } from 'src/common/loggers/logger.module';
-//import { UsersModule } from 'src/modules/users/users.module';
+import { UsersModule } from 'src/modules/users/users.module';
 import { UploadS3Module } from 'src/common/s3/uploader3.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { BullModule } from '@nestjs/bullmq';
 import redisConfig from 'src/config/redis.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { PrismaModule } from 'src/common/prisma/prisma.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import mongoConfig from 'src/config/mongo.config';
+import slackConfig from './config/slack.config';
+import { pathEnv } from './config/pathEnv';
+import appConfig from './config/app.config';
+import typeormConfig from './config/typeorm.config';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: [pathEnv, '.env'],
+      envFilePath: [pathEnv],
       isGlobal: true,
-      load: [appConfig, typeormConfig, mongoConfig],
+      load: [appConfig, typeormConfig, mongoConfig, slackConfig],
     }),
     EventEmitterModule.forRoot(),
-    PrismaModule,
+    // PrismaModule,
     BullModule.forRootAsync({
       imports: [ConfigModule.forRoot({ load: [redisConfig] })],
       useFactory: (configDatabase: ConfigType<typeof redisConfig>) => ({
@@ -48,7 +50,8 @@ import mongoConfig from 'src/config/mongo.config';
     }),
     UploadS3Module,
     LoggerModule,
-    // UsersModule,
+    UsersModule,
+    AuthModule,
   ],
 
   exports: [ConfigModule],

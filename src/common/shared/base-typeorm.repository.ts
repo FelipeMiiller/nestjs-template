@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import {
   DeepPartial,
   FindManyOptions,
@@ -55,16 +55,16 @@ export abstract class BaseTypeOrmRepository<T> {
     }
   }
 
-  async update(id: string, entity: DeepPartial<T>): Promise<T | null> {
+  async update(id: string, entity: DeepPartial<T>, options?: SaveOptions): Promise<T | null> {
     const updateEntity = await this.repository.preload({
-      id,
+      Id: id,
       ...entity,
-    } as any);
+    });
     if (!updateEntity) {
-      return null;
+      throw new NotFoundException(`Record not found for ID: ${id}`);
     }
     try {
-      return await this.repository.save(updateEntity);
+      return await this.repository.save(updateEntity, options);
     } catch (error) {
       this.handlePostgresError(error);
     }

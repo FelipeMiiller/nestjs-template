@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { IncomingWebhook, IncomingWebhookDefaultArguments } from '@slack/webhook';
 
 @Injectable()
 export class SlackLoggerService {
   private webhook: IncomingWebhook | null = null;
 
-  constructor(config: { url: string; defaults?: IncomingWebhookDefaultArguments }) {
-    const { url, defaults } = config;
+  constructor(private configService: ConfigService) {
+    const { url, defaults } = this.configService.get('slack');
     if (url) {
       this.webhook = new IncomingWebhook(url, defaults);
     }
